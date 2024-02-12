@@ -1,0 +1,185 @@
+import pygame, sys
+import time
+import random
+ 
+pygame.init() # initialization function
+
+# RGB colors 
+White = (255, 255, 255)
+Yellow = (255, 255, 102)
+Black = (0, 0, 0)
+Red = (250, 5, 5)
+Green = (31, 245, 2)
+Blue = (50, 153, 213)
+
+# width & height of game 
+wid = 600
+hei = 400
+
+# setting screen
+Screen = pygame.display.set_mode((wid, hei))
+pygame.display.set_caption('my game')
+
+# the time
+The_time = pygame.time.Clock()
+
+# body and speed of snake 
+body_snake = 10
+speed_snake = 15
+
+# the fonts in the game 
+font_type = pygame.font.SysFont("bahnschrift", 25)
+font_score = pygame.font.SysFont("comicsansms", 20)
+ 
+# all of this is the function of game
+# this function use to display the score in game
+def function_score(score):
+    value = font_score.render("Score: " + str(score), True, White)
+    Screen.blit(value, [450, 365])
+
+def function_high_score(h_score):
+    h = font_score.render("Best: " + str(h_score), True, Red)
+    Screen.blit(h, [300, 365])
+
+def text_1(email):
+    mail = font_score.render(email, True, Green)
+    Screen.blit(mail, [6, 365])
+
+# this function use to draw the snake  
+def function_snake(body_snake, snake_block):
+    for x in snake_block:
+        pygame.draw.rect(Screen, White, [x[0], x[1], body_snake+2, body_snake+2])
+        pygame.draw.rect(Screen, Black, [x[0]+1, x[1]+1, body_snake, body_snake])
+ 
+def font_lose(msg, color):
+    mesg = font_type.render(msg, True, color)
+    Screen.blit(mesg, [250, hei / 3])
+
+# function to save score to a text file
+def save_score(score):
+    with open("D:\\User\\python\\high_score.txt", "w") as file:
+        file.write(str(score))
+
+# function to load the score from a text file
+def load_score():
+    try:
+        with open("D:\\User\\gamer\\high_score.txt", "r") as file:
+            content = file.read()
+            if content:
+                return int(content)
+            else:
+                return 0
+    except FileNotFoundError:
+        return 0
+ 
+def function_on_game():
+    lose_game = False
+    off_game = False
+ 
+    x1 = wid / 2
+    y1 = hei / 2
+ 
+    x1_change = 0
+    y1_change = 0
+ 
+    snake_block = []
+    Length_of_snake = 1
+
+    high_score = load_score()
+ 
+    foodx = round(random.randrange(0, wid - body_snake) / 10.0) * 10.0
+    foody = round(random.randrange(0, hei - 45) / 10.0) * 10.0
+ 
+    while not lose_game:
+        while off_game == True:
+            Screen.fill(Black)
+            font_lose("Game over", Yellow)
+            pygame.draw.rect(Screen, White, [0, 360, 600, 40])
+            pygame.draw.rect(Screen, Black, [448, 362, 152, 38])
+            pygame.draw.rect(Screen, Black, [298, 362, 148, 38])
+            pygame.draw.rect(Screen, Black, [0, 362, 295, 38])
+            pygame.draw.rect(Screen, White, [0, 0, 2, 400])
+            pygame.draw.rect(Screen, White, [598, 0, 2, 400])
+            pygame.draw.rect(Screen, White, [0, 398, 600, 2])
+            pygame.draw.rect(Screen, White, [0, 0, 600, 2])
+            function_score(Length_of_snake - 1)
+            function_high_score(high_score)
+            text_1("richardhuynguyen8@gmail.com")
+
+            # Check if the player has beaten the high score
+            if Length_of_snake - 1 > high_score:
+                high_score = Length_of_snake - 1
+                # Save the new high score
+                save_score(high_score)
+            pygame.display.update()
+ 
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    lose_game = True
+                    off_game = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_SPACE:
+                        function_on_game()
+ 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                lose_game = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    x1_change = -body_snake
+                    y1_change = 0
+                elif event.key == pygame.K_RIGHT:
+                    x1_change = body_snake
+                    y1_change = 0
+                elif event.key == pygame.K_UP:
+                    y1_change = -body_snake
+                    x1_change = 0
+                elif event.key == pygame.K_DOWN:
+                    y1_change = body_snake
+                    x1_change = 0
+        if x1 >= wid or x1 < 0 or y1 >= hei - 42 or y1 < 0:
+            off_game = True
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                lose_game = True
+        x1 += x1_change
+        y1 += y1_change
+        Screen.fill(Black)
+        pygame.draw.rect(Screen, Green, [foodx, foody, body_snake, body_snake])
+        snake_Head = []
+        snake_Head.append(x1)
+        snake_Head.append(y1)
+        snake_block.append(snake_Head)
+        if len(snake_block) > Length_of_snake:
+            del snake_block[0]
+    
+        for x in snake_block[:-1]:
+            if x == snake_Head:
+                off_game = True
+    
+        function_snake(body_snake, snake_block)
+        pygame.draw.rect(Screen, White, [0, 360, 600, 40])
+        pygame.draw.rect(Screen, Black, [448, 362, 152, 38])
+        pygame.draw.rect(Screen, Black, [298, 362, 148, 38])
+        pygame.draw.rect(Screen, Black, [0, 362, 295, 38])
+        pygame.draw.rect(Screen, White, [0, 0, 2, 400])
+        pygame.draw.rect(Screen, White, [598, 0, 2, 400])
+        pygame.draw.rect(Screen, White, [0, 398, 600, 2])
+        pygame.draw.rect(Screen, White, [0, 0, 600, 2])
+        function_score(Length_of_snake - 1)
+        function_high_score(high_score)
+        text_1("richardhuynguyen8@gmail.com")
+    
+        pygame.display.update()
+ 
+        if x1 == foodx and y1 == foody:
+            foodx = round(random.randrange(0, wid - body_snake) / 10.0) * 10.0
+            foody = round(random.randrange(0, hei - 45) / 10.0) * 10.0
+            Length_of_snake += 1
+ 
+        The_time.tick(speed_snake)
+ 
+    pygame.quit()
+    sys.exit()
+ 
+function_on_game() 
